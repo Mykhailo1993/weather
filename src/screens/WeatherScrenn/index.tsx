@@ -4,16 +4,19 @@ import {useDispatch, useSelector} from 'react-redux';
 
 import type {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {AppNavigationParamList} from '../../navigation';
-import {fetchTodoRequest} from '../../store/todo/action';
 
 import {getTodosSelector} from '../../store/todo/selectors';
+import store from '../../store';
+import {sagaActions} from '../../store/sagaActions';
 type Props = NativeStackScreenProps<AppNavigationParamList, 'Weather'>;
 
 const WeatherScreen = ({navigation}: Props) => {
   const [weaterFievDays, setWeaterFievDays] = useState();
   const [allWeather, setAllWeather] = useState([{title: '', data: []}]);
   const dispatch = useDispatch();
-  const todos = useSelector(getTodosSelector);
+  // const todos = useSelector(getTodosSelector);
+
+  const myStore = store.getState();
 
   const navigateWeaterForDay = (weatherForDay: any) => () => {
     navigation.navigate('WeatherForDay', {weather: weatherForDay});
@@ -21,18 +24,18 @@ const WeatherScreen = ({navigation}: Props) => {
   const convertTemp = (temp: number) => (temp - 273.15).toFixed(1);
 
   useEffect(() => {
-    dispatch(fetchTodoRequest());
+    dispatch({type: sagaActions.FETCH_DATA_SAGA});
   }, [dispatch]);
 
   useEffect(() => {
-    const [list] = todos;
+    const [list] = myStore.weather.weathers;
     setWeaterFievDays(list?.slice(0, 5));
     const weatherWeeks = [
       {title: 'First Weak', data: [list?.slice(0, 7)]},
       {title: 'Secend Weak', data: [list?.slice(7)]},
     ];
     setAllWeather(weatherWeeks);
-  }, [todos]);
+  }, [myStore.weather.weathers]);
 
   const Item = ({title}) => {
     return (
