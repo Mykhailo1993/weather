@@ -1,20 +1,26 @@
-import {createSlice} from '@reduxjs/toolkit';
+import {createSlice, PayloadAction} from '@reduxjs/toolkit';
+
+export type Weather = {weathers: {}};
+type WeathersState = {
+  weathers: Weather[];
+  isLoading: boolean;
+};
+
+const initialState: WeathersState = {
+  weathers: [],
+  isLoading: false,
+};
 
 export const weatherSlice = createSlice({
   name: 'weather',
-  initialState: {
-    weathers: [],
-    isLoading: false,
-  },
+  initialState,
   reducers: {
     getFetchData: state => {
       state.isLoading = true;
     },
-    getDataSuccess: (state, action) => {
-      console.log('That');
-      console.log(action);
-
-      state.weathers = action.payload.weathers;
+    getDataSuccess: (state, action: PayloadAction<Weather>) => {
+      const {weathers} = action.payload;
+      state.weathers = weathers[0];
       state.isLoading = false;
     },
     getDataFailure: state => {

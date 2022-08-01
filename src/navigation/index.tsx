@@ -6,7 +6,7 @@ import WeatherForDayScreen from '../screens/WeatherForDayScreen';
 
 export type AppNavigationParamList = {
   Weather: undefined;
-  WeatherForDay: undefined;
+  WeatherForDay: {weather: string};
 };
 
 const Stack = createNativeStackNavigator<AppNavigationParamList>();

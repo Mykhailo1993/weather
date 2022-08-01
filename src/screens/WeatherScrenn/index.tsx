@@ -1,24 +1,27 @@
 import React, {useEffect, useState} from 'react';
-import {Text, View, SectionList, StyleSheet, Pressable} from 'react-native';
+import {Text, View, SectionList, Pressable} from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 
 import type {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {AppNavigationParamList} from '../../navigation';
 
-import {getTodosSelector} from '../../store/todo/selectors';
-import store from '../../store';
 import {sagaActions} from '../../store/sagaActions';
+
+import ItemWeather from '../../components/ItemWeather';
+import {Weather} from '../../store/weather/weatherSlice';
+import {getWeathersSelector} from '../../store/weather/selectors';
+
+import styles from './styles';
+
 type Props = NativeStackScreenProps<AppNavigationParamList, 'Weather'>;
 
 const WeatherScreen = ({navigation}: Props) => {
-  const [weaterFievDays, setWeaterFievDays] = useState();
+  const [weaterFievDays, setWeaterFievDays] = useState<Weather[]>([]);
   const [allWeather, setAllWeather] = useState([{title: '', data: []}]);
   const dispatch = useDispatch();
-  // const todos = useSelector(getTodosSelector);
+  const weathers = useSelector(getWeathersSelector);
 
-  const myStore = store.getState();
-
-  const navigateWeaterForDay = (weatherForDay: any) => () => {
+  const navigateWeaterForDay = (weatherForDay: string) => () => {
     navigation.navigate('WeatherForDay', {weather: weatherForDay});
   };
   const convertTemp = (temp: number) => (temp - 273.15).toFixed(1);
@@ -28,28 +31,13 @@ const WeatherScreen = ({navigation}: Props) => {
   }, [dispatch]);
 
   useEffect(() => {
-    const [list] = myStore.weather.weathers;
-    setWeaterFievDays(list?.slice(0, 5));
+    setWeaterFievDays(weathers?.slice(0, 5));
     const weatherWeeks = [
-      {title: 'First Weak', data: [list?.slice(0, 7)]},
-      {title: 'Secend Weak', data: [list?.slice(7)]},
+      {title: 'First Weak', data: [weathers?.slice(0, 7)]},
+      {title: 'Secend Weak', data: [weathers?.slice(7)]},
     ];
     setAllWeather(weatherWeeks);
-  }, [myStore.weather.weathers]);
-
-  const Item = ({title}) => {
-    return (
-      <View style={styles.item}>
-        {title?.map(i => {
-          return (
-            <Text style={{marginTop: 5, backgroundColor: 'red'}}>
-              {convertTemp(i.main.temp_min)}
-            </Text>
-          );
-        })}
-      </View>
-    );
-  };
+  }, [weathers]);
 
   return (
     <View style={styles.container}>
@@ -68,51 +56,20 @@ const WeatherScreen = ({navigation}: Props) => {
       </View>
 
       <SectionList
-        style={{flex: 1}}
         bounces={false}
         sections={allWeather}
         keyExtractor={(item, index) => item + index}
-        renderItem={({item, index}) => <Item title={item} index={index} />}
+        renderItem={({item}) => {
+          return <ItemWeather title={item} key={item.dt} />;
+        }}
         renderSectionHeader={({section: {title}}) => (
-          <Text style={styles.header}>{title}</Text>
+          <Text key={title} style={styles.header}>
+            {title}
+          </Text>
         )}
       />
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    marginHorizontal: 16,
-  },
-  cityText: {textAlign: 'center', fontSize: 25, marginVertical: 5},
-  item: {
-    backgroundColor: '#f9c2ff',
-    padding: 20,
-    marginVertical: 8,
-  },
-  itemContainer: {
-    flexWrap: 'wrap',
-    flexDirection: 'row',
-    height: 200,
-    alignContent: 'center',
-  },
-  itemCalendar: {
-    width: '23%',
-    height: '40%',
-    backgroundColor: 'gray',
-    margin: 2,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  header: {
-    fontSize: 32,
-    backgroundColor: '#fff',
-  },
-  title: {
-    fontSize: 24,
-  },
-});
 
 export default WeatherScreen;
